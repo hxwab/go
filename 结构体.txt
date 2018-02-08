@@ -1,0 +1,55 @@
+type Options struct{
+	 name string
+	 age  int
+}
+
+
+func test()  {
+  o :=Options{name:"test",age:8}
+  o =Options{"test",8}
+  fmt.Println(o)
+}
+
+
+
+
+var P Options // P现在就是Options 类型的变量了
+
+P.name = "Astaxie"  // 赋值"Astaxie"给P的name属性.
+P.age = 25  // 赋值"25"给变量P的age属性
+fmt.Printf("The person's name is %s", P.name)  // 访问P的name属性.
+除了上面这种P的声明使用之外，还有另外几种声明使用方式：
+
+1.按照顺序提供初始化值
+
+P := Options {"Tom", 25}
+
+2.通过field:value的方式初始化，这样可以任意顺序
+
+P := Options {age:24, name:"Tom"}
+
+3.当然也可以通过new函数分配一个指针，此处P的类型为*person
+
+P := new(Options )
+
+
+
+struct的匿名字段
+
+我们上面介绍了如何定义一个struct，定义的时候是字段名与其类型一一对应，实际上Go支持只提供类型，而不写字段名的方式，也就是匿名字段，也称为嵌入字段。
+
+当匿名字段是一个struct的时候，那么这个struct所拥有的全部字段都被隐式地引入了当前定义的这个struct。
+
+
+type Human struct {
+	name string
+	age int
+	weight int
+}
+
+type Student struct {
+	Human  // 匿名字段，那么默认Student就包含了Human的所有字段
+	speciality string
+}
+
+https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/02.4.md

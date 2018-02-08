@@ -1,0 +1,18 @@
+
+switch var1 {
+	case val1:
+		...
+	case val2:
+		...
+	default:
+		...
+}
+
+for i:=0;i<5;i++{
+...
+}
+
+
+for pos, char := range str {
+...
+}
