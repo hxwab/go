@@ -19,6 +19,25 @@ Go 默认使用按值传递来传递参数，也就是传递参数的副本。�
 尽量使用命名返回值：会使代码更清晰、更简短，同时更加容易读懂。
 
 
+
+
+func trace(s string) string {
+	fmt.Println("entering:", s)
+	return s
+}
+
+func un(s string) {
+	fmt.Println("leaving:", s)
+}
+
+func a() {
+	//defer 执行的函数参数为函数时，内部的函数按defer声明的位置执行。外部的函数在整个函数执行完毕后再执行
+	defer un(trace("a"))
+	fmt.Println("in a")
+}
+
+
+
 变参：
 如果函数的最后一个参数是采用 ...type 的形式，那么这个函数就可以处理一个变长的参数，这个长度可以为 0，这样的函数称为变参函数。
 
