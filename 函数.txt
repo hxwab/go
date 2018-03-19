@@ -1,50 +1,52 @@
-�����Ҫ����һ�����ⲿ����ĺ�������ֻ��Ҫ�����������뺯��ǩ��������Ҫ���������壺
+如果需要申明一个在外部定义的函数，你只需要给出函数名与函数签名，不需要给出函数体：
 
 func flushICache(begin, end uintptr) // implemented externally
-����Ҳ�����������ķ�ʽ��ʹ�ã���Ϊһ���������ͣ�����
+函数也可以以申明的方式被使用，作为一个函数类型，就像：
 
 type binOp func(int, int) int
-���������Ҫ������ {}��
+在这里，不需要函数体 {}。
 
-������һ��ֵ��first-class value�������ǿ��Ը�ֵ������������ add := binOp һ����
+函数是一等值（first-class value）：它们可以赋值给变量，就像 add := binOp 一样。
 
-Go Ĭ��ʹ�ð�ֵ���������ݲ�����Ҳ���Ǵ��ݲ����ĸ������������ղ�������֮����ʹ�ñ����Ĺ����п��ܶԸ�����ֵ���и��ģ�������Ӱ�쵽ԭ���ı��������� Function(arg1)��
+Go 默认使用按值传递来传递参数，也就是传递参数的副本。函数接收参数副本之后，在使用变量的过程中可能对副本的值进行更改，但不会影响到原来的变量，比如 Function(arg1)。
 
-�����ϣ����������ֱ���޸Ĳ�����ֵ�������ǶԲ����ĸ������в���������Ҫ�������ĵ�ַ��������ǰ������&���ţ����� &variable�����ݸ�����������ǰ����ô��ݣ����� Function(&arg1)����ʱ���ݸ���������һ��ָ�롣������ݸ���������һ��ָ�룬ָ���ֵ��һ����ַ���ᱻ���ƣ���ָ���ֵ��ָ��ĵ�ַ�ϵ�ֵ���ᱻ���ƣ����ǿ���ͨ�����ָ���ֵ���޸����ֵ��ָ��ĵ�ַ�ϵ�ֵ��������ע��ָ��Ҳ�Ǳ������ͣ����Լ��ĵ�ַ��ֵ��ͨ��ָ���ֵָ��һ�������ĵ�ַ�����ԣ������ô���Ҳ�ǰ�ֵ���ݡ���
+如果你希望函数可以直接修改参数的值，而不是对参数的副本进行操作，你需要将参数的地址（变量名前面添加&符号，比如 &variable）传递给函数，这就是按引用传递，比如 Function(&arg1)，此时传递给函数的是一个指针。如果传递给函数的是一个指针，指针的值（一个地址）会被复制，但指针的值所指向的地址上的值不会被复制；我们可以通过这个指针的值来修改这个值所指向的地址上的值。（译者注：指针也是变量类型，有自己的地址和值，通常指针的值指向一个变量的地址。所以，按引用传递也是按值传递。）
 
-�������κ�����£�����ָ�루һ��32λ����64λ��ֵ�������Ķ��ȴ��ݸ��������١�
+几乎在任何情况下，传递指针（一个32位或者64位的值）的消耗都比传递副本来得少。
+
+在函数调用时，像切片（slice）、字典（map）、接口（interface）、通道（channel）这样的引用类型都是默认使用引用传递（即使没有显式的指出指针）。
 
 
-��Σ�
-������������һ�������ǲ��� ...type ����ʽ����ô��������Ϳ��Դ���һ���䳤�Ĳ�����������ȿ���Ϊ 0�������ĺ�����Ϊ��κ�����
+变参：
+如果函数的最后一个参数是采用 ...type 的形式，那么这个函数就可以处理一个变长的参数，这个长度可以为 0，这样的函数称为变参函数。
 
 func myFunc(a, b, arg ...int) {}
 
 
-1����������䳤���������Ͳ����Ƕ���ͬ���أ�ʹ�� 5 �����������д��ݲ����Ǻ����ǵ�ѡ���� 2 �ַ������Խ��������⣺
+1、但是如果变长参数的类型并不是都相同的呢？使用 5 个参数来进行传递并不是很明智的选择，有 2 种方案可以解决这个问题：
 
-ʹ�ýṹ������� 10 �£���
+使用结构（详见第 10 章）：
 
-����һ���ṹ���ͣ��������� Options�����Դ洢���п��ܵĲ�����
+定义一个结构类型，假设它叫 Options，用以存储所有可能的参数：
 
 type Options struct {
 	par1 type1,
 	par2 type2,
 	...
 }
-���� F1 ����ʹ�������Ĳ��� a �� b���Լ�һ��û���κγ�ʼ���� Options �ṹ�� F1(a, b, Options {})�������Ҫ��ѡ����г�ʼ���������ʹ�� F1(a, b, Options {par1:val1, par2:val2})��
-/2��ʹ�ÿսӿڣ�
+函数 F1 可以使用正常的参数 a 和 b，以及一个没有任何初始化的 Options 结构： F1(a, b, Options {})。如果需要对选项进行初始化，则可以使用 F1(a, b, Options {par1:val1, par2:val2})。
+/2、使用空接口：
 
-���һ���䳤����������û�б�ָ���������ʹ��Ĭ�ϵĿսӿ� interface{}�������Ϳ��Խ����κ����͵Ĳ���������� 11.9 �ڣ����÷��������������ڳ���δ֪�Ĳ����������������κβ�ȷ�����͵Ĳ�����һ��������ǻ�ʹ��һ�� for-range ѭ���Լ� switch �ṹ��ÿ�����������ͽ����жϣ�
+如果一个变长参数的类型没有被指定，则可以使用默认的空接口 interface{}，这样就可以接受任何类型的参数（详见第 11.9 节）。该方案不仅可以用于长度未知的参数，还可以用于任何不确定类型的参数。一般而言我们会使用一个 for-range 循环以及 switch 结构对每个参数的类型进行判断：
 
-func typecheck(..,..,values �� interface{}) {
+func typecheck(..,..,values … interface{}) {
 	for _, value := range values {
 		switch v := value.(type) {
-			case int: ��
-			case float: ��
-			case string: ��
-			case bool: ��
-			default: ��
+			case int: …
+			case float: …
+			case string: …
+			case bool: …
+			default: …
 		}
 	}
 }
@@ -52,7 +54,7 @@ func typecheck(..,..,values �� interface{}) {
 
 
 
-�ص�����
+回调函数
 
 func  callback(y int ,f func(int,int))  {
 	f(y,2)
