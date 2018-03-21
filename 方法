@@ -1,0 +1,34 @@
+定义方法的一般格式如下：
+
+func (recv receiver_type) methodName(parameter_list) (return_value_list) { ... }
+在方法名之前，func 关键字之后的括号中指定 receiver。
+
+如果 recv 是 receiver 的实例，Method1 是它的方法名，那么方法调用遵循传统的 object.name 选择器符号：recv.Method1()。
+
+如果 recv 一个指针，Go 会自动解引用。
+
+如果方法不需要使用 recv 的值，可以用 _ 替换它，比如：
+
+func (_ receiver_type) methodName(parameter_list) (return_value_list) { ... }
+
+
+在 Go 中，类型的代码和绑定在它上面的方法的代码可以不放置在一起，它们可以存在在不同的源文件，唯一的要求是：它们必须是同一个包的。
+
+下面这段代码有什么错？
+
+package main
+
+import "container/list"
+
+func (p *list.List) Iter() {
+	// ...
+}
+
+func main() {
+	lst := new(list.List)
+	for _= range lst.Iter() {
+	}
+}
+类型和作用在它上面定义的方法必须在同一个包里定义，这就是为什么不能在 int、float 或类似这些的类型上定义方法。试图在 int 类型上定义方法会得到一个编译错误：
+
+但是有一个间接的方式：可以先定义该类型（比如：int 或 float）的别名类型，然后再为别名类型定义方法。或者像下面这样将它作为匿名类型嵌入在一个新的结构体中。当然方法只在这个别名类型上有效
