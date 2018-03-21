@@ -10,3 +10,21 @@
 如果转换合法，v 是 varI 转换到类型 T 的值，ok 会是 true；否则 v 是类型 T 的零值，ok 是 false，也没有运行时错误发生。
 
 应该总是使用上面的方式来进行类型断言。
+
+
+接口变量的类型也可以使用一种特殊形式的 switch 来检测：type-switch （下面是示例 11.4 的第二部分）：
+
+switch t := areaIntf.(type) {
+case *Square:
+	fmt.Printf("Type Square %T with value %v\n", t, t)
+case *Circle:
+	fmt.Printf("Type Circle %T with value %v\n", t, t)
+case nil:
+	fmt.Printf("nil value: nothing to check?\n")
+default:
+	fmt.Printf("Unexpected type %T\n", t)
+}
+输出：
+
+Type Square *main.Square with value &{5}
+变量 t 得到了 areaIntf 的值和类型， 所有 case 语句中列举的类型（nil 除外）都必须实现对应的接口（在上例中即 Shaper），如果被检测类型没有在 case 语句列举的类型中，就会执行 default 语句。
