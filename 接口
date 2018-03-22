@@ -47,3 +47,20 @@ Go 语言规范定义了接口方法集的调用规则：
 类型 *T 的可调用方法集包含接受者为 *T 或 T 的所有方法集
 类型 T 的可调用方法集包含接受者为 T 的所有方法
 类型 T 的可调用方法集不包含接受者为 *T 的方法
+
+
+假设你有一个 myType 类型的数据切片，你想将切片中的数据复制到一个空接口切片中，类似：
+
+var dataSlice []myType = FuncReturnSlice()
+var interfaceSlice []interface{} = dataSlice
+可惜不能这么做，编译时会出错：cannot use dataSlice (type []myType) as type []interface { } in assignment。
+
+原因是它们俩在内存中的布局是不一样的（参考 官方说明）。
+
+必须使用 for-range 语句来一个一个显式地复制：
+
+var dataSlice []myType = FuncReturnSlice()
+var interfaceSlice []interface{} = make([]interface{}, len(dataSlice))
+for i, d := range dataSlice {
+    interfaceSlice[i] = d
+}
